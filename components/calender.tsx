@@ -8,6 +8,9 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import localeData from "dayjs/plugin/localeData";
 import { Button } from "./ui/button";
+import { FaChevronLeft } from "react-icons/fa";
+import { FaChevronRight } from "react-icons/fa";
+import classNames from "classnames";
 
 dayjs.extend(weekday);
 dayjs.extend(isoWeek);
@@ -20,20 +23,21 @@ const Calendar = () => {
   const [arrivalDay, setArrivalDay] = useState<null | Dayjs>(null);
   const [leavingDay, setLeavingDay] = useState<null | Dayjs>(null);
 
-  function selectDay({ day }: { day: Dayjs }) {
+  const selectDay = ({ day }: { day: Dayjs }) => {
     if (
       arrivalDay === null ||
       arrivalDay?.isAfter(day) ||
       arrivalDay.isSame(day)
     ) {
       setArrivalDay(day);
+      setLeavingDay(null);
     } else if (leavingDay === null) {
       setLeavingDay(day);
     } else {
       setArrivalDay(day);
       setLeavingDay(null);
     }
-  }
+  };
 
   const weekdays = dayjs.weekdaysShort();
   const startOfMonth = currentDay.startOf("month");
@@ -68,22 +72,48 @@ const Calendar = () => {
     ...nextMonthDays,
   ];
 
-  const segmentClasses = "h-full w-full p-8 flex justify-start items-center";
+  const segmentClasses =
+    "h-full w-full p-4 flex justify-center items-center transition-all";
+
+  const dayClasses = ({ day, index }: { day: Dayjs; index: number }) => {
+    const isArrivalDay = day.isSame(arrivalDay);
+    const isBetweenJourney =
+      day.isAfter(arrivalDay) && day.isBefore(leavingDay);
+    const isLeavingDay = day.isSame(leavingDay);
+    const isCurrentMonth = day.month() === currentDay.month();
+
+    return classNames("calendar-day", "hover:bg-stone-500", segmentClasses, {
+      "text-stone-200": !isCurrentMonth,
+      "rounded-l-2xl": index % 7 === 0 || isArrivalDay,
+      "rounded-r-2xl":
+        index % 7 === 6 ||
+        isLeavingDay ||
+        (isArrivalDay && leavingDay === null),
+      "bg-stone-700 text-stone-50":
+        isArrivalDay || isBetweenJourney || isLeavingDay,
+    });
+  };
 
   return (
-    <div className='calendar p-8 flex flex-col gap-12'>
-      <div className='calendar-header flex gap-4 items-center'>
-        <Button onClick={() => setCurrentDay(currentDay.subtract(1, "month"))}>
-          이전달
+    <div className='calendar p-2 flex flex-col gap-12 border border-stone-400 rounded-xl relatve'>
+      <div className='calendar-header flex justify-between gap-4 items-center'>
+        <Button
+          variant='ghost'
+          onClick={() => setCurrentDay(currentDay.subtract(1, "month"))}
+        >
+          <FaChevronLeft />
         </Button>
-        <Button onClick={() => setCurrentDay(currentDay.add(1, "month"))}>
-          다음달
-        </Button>
-        <div className='calendar-header text-2xl'>
+        <div className='calendar-header text-2xl font-semibold'>
           {currentDay.format("YYYY년 MMMM")}
         </div>
+        <Button
+          variant='ghost'
+          onClick={() => setCurrentDay(currentDay.add(1, "month"))}
+        >
+          <FaChevronRight />
+        </Button>
       </div>
-      <div className='calendar-grid grid grid-cols-7 auto-rows-[4rem] p-4'>
+      <div className='calendar-grid grid grid-cols-7 grid-rows-6 p-4 gap-y-2'>
         {weekdays.map((weekday) => (
           <div
             key={weekday}
@@ -98,20 +128,10 @@ const Calendar = () => {
         {calendarDays.map((day, index) => (
           <div
             key={index}
-            className={`calendar-day 
-              ${segmentClasses}
-              ${day.month() !== currentDay.month() ? "text-gray-200" : ""}
-              ${day.isSame(arrivalDay) ? "bg-green-200" : ""}
-              ${
-                day.isAfter(arrivalDay) && day.isBefore(leavingDay)
-                  ? "bg-violet-200"
-                  : ""
-              }
-              ${day.isSame(leavingDay) ? "bg-cyan-200" : ""}
-              `}
+            className={dayClasses({ day, index })}
             onMouseDown={() => selectDay({ day })}
           >
-            {day.date()}
+            <div>{day.date()}</div>
           </div>
         ))}
       </div>
