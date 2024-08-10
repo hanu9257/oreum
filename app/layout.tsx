@@ -16,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='kr'>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <main className='flex flex-col p-8 gap-12 items-center h-[100vh]'>
+          <nav className='w-full font-black text-4xl'>OREUM</nav>
+          {children}
+        </main>
+      </body>
     </html>
   );
 }
