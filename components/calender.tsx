@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import classNames from "classnames";
 import dayjs, { Dayjs } from "dayjs";
 import ko from "dayjs/locale/ko";
-import weekday from "dayjs/plugin/weekday";
-import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
+import isoWeek from "dayjs/plugin/isoWeek";
 import localeData from "dayjs/plugin/localeData";
+import weekday from "dayjs/plugin/weekday";
+import { useState } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Button } from "./ui/button";
-import { FaChevronLeft } from "react-icons/fa";
-import { FaChevronRight } from "react-icons/fa";
-import classNames from "classnames";
 
 dayjs.extend(weekday);
 dayjs.extend(isoWeek);
@@ -82,16 +81,22 @@ const Calendar = () => {
     const isLeavingDay = day.isSame(leavingDay);
     const isCurrentMonth = day.month() === currentDay.month();
 
-    return classNames("calendar-day", "hover:bg-stone-500", segmentClasses, {
-      "text-stone-200": !isCurrentMonth,
-      "rounded-l-2xl": index % 7 === 0 || isArrivalDay,
-      "rounded-r-2xl":
-        index % 7 === 6 ||
-        isLeavingDay ||
-        (isArrivalDay && leavingDay === null),
-      "bg-stone-700 text-stone-50":
-        isArrivalDay || isBetweenJourney || isLeavingDay,
-    });
+    return classNames(
+      "calendar-day",
+      "hover:bg-stone-500",
+      "hover:rounded-2xl",
+      segmentClasses,
+      {
+        "text-stone-200": !isCurrentMonth,
+        "bg-stone-700 text-stone-50 hover:rounded-none":
+          isArrivalDay || isBetweenJourney || isLeavingDay,
+        "rounded-l-2xl hover:rounded-l-2xl": index % 7 === 0 || isArrivalDay,
+        "rounded-r-2xl hover:rounded-r-2xl":
+          index % 7 === 6 ||
+          isLeavingDay ||
+          (isArrivalDay && leavingDay === null),
+      },
+    );
   };
 
   return (
